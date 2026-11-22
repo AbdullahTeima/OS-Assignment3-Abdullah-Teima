@@ -132,16 +132,20 @@
 
 ## Your Development Log
 
-### Entry 1 - [Date and Time]
-**What I did**:
+### Entry 1 - [Novemvber 22, 2026, 8:50 PM]
+**What I did**: Forked the repository.
 
 **Details**:
+- forked the repository and rename it to my name.
+- open VS code and linked it with GitHub.
+- set my ID in line 304.
+- run the code.
 
-**Challenges**:
+**Challenges**: I forget how to link VS code with GitHub to make changes in VS.
 
-**Solution**:
+**Solution**: search about how it can done.
 
-**Time spent**:
+**Time spent**: 15 minutes.
 
 ---
 
