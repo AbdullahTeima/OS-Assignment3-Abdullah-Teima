@@ -149,29 +149,34 @@
 
 ---
 
-### Entry 2 - [Date and Time]
-**What I did**:
+### Entry 2 - [November 22, 2026, 10:30 PM]
+**What I did**: add feature 1 and 2 
 
 **Details**:
+- added a ReentrantLock (ready queue lock) inside add,poll,processOf and snapshot using try / finally blcks
+- Added separate ReentrantLock instances in SharedStats (contextSwitchLock, completedProcessLock, and serviceTimeLock) to guard both writes (incrementContextSwitch, incrementCompletedProcess, addServiceTime) and reads (getContextSwitchCount, getCompletedProcessCount, getTotalServiceTime) with fine-grained locking.
 
-**Challenges**:
+**Challenges**: some systax error like missing a ; and dublicate the the critical section inside try / finally block and after there.
 
-**Solution**:
+**Solution**: put the ; and remove the dublicated section.
 
-**Time spent**:
+**Time spent**: 2 hours
 
 ---
 
-### Entry 3 - [Date and Time]
-**What I did**:
+### Entry 3 - [November 22, 2026, 11:30 PM]
+**What I did**: add feature 3 and add student information in MY_WORK.
 
 **Details**:
+- Added a Semaphore (availableProcesses initialized to 0) in ReadyQueue with acquireProcess() and releaseForShutdown(int permits) methods, called availableProcesses.release() when a process is added, removed busy-waiting sleep/polling (Thread.sleep(20) and busyWaitPolls) from CpuWorker.run(), and released shutdown permits (SharedStats.totalCPUs) once all processes finished so waiting worker threads could exit cleanly.
+- Ran the simulation multiple times and verified matching expected and observed counts with 0 busy-waiting polls.
+- update student information in MY_WORK (name, id, gitHub link, ..)
 
-**Challenges**:
+**Challenges**: hit a method parameter syntax misteke when writing releaseForShutdown.
 
-**Solution**:
+**Solution**: fixed the int permits parameter declaration in releaseForShutdown.
 
-**Time spent**:
+**Time spent**: 1 houre.
 
 ---
 
