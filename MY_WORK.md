@@ -180,16 +180,17 @@
 
 ---
 
-### Entry 4 - [Date and Time]
-**What I did**:
+### Entry 4 - [November 23, 2026, 8:00 PM]
+**What I did**: complete the reflecction section.
 
 **Details**:
+- answer all question 1 to 4.
 
-**Challenges**:
+**Challenges**: write the answer in 5-7 sentence.
 
-**Solution**:
+**Solution**: understanding quenstion then answering carfully.
 
-**Time spent**:
+**Time spent**: 1 hour.
 
 ---
 
@@ -249,7 +250,7 @@
 
 **Your Answer:** *(5-7 sentences)*
 
-[Write your answer here.]
+[I learned that when multiple threads access shared data like ReadyQueue and SharedStats at the same time, race conditions can cause lost updates and inconsistent counts. Using ReentrantLock with try and finally blocks ensures mutual exclusion around critical sections so only one thread modifies shared lists, maps, or counters at a time. Putting unlock() inside the finally block is important because it guarantees the lock is always released even if an early return or exception happens. I also learned that a counting Semaphore is much better than busy-waiting because it lets CpuWorker threads sleep until a process is actually added to the queue. When I ran the final version, seeing the VERIFICATION section show 0 busy-waiting polls and matching expected and observed values proved how effective proper synchronization is.]
 
 ## Question 2: What was the most challenging part of this assignment?
 
@@ -257,7 +258,7 @@
 
 **Your Answer:** *(5-7 sentences)*
 
-[Write your answer here.]
+[The most challenging part for me was implementing the clean shutdown mechanism with the counting Semaphore in CpuWorker and ReadyQueue. At first, it was tricky to understand why availableProcesses had to start at 0 and how acquireProcess() would block worker threads when the queue was empty. If the main thread did not release enough permits after all processes finished, the CpuWorker threads would stay blocked forever and the program would never exit. Calling releaseForShutdown(SharedStats.totalCPUs) solved this, but I also had to be careful with the method signature and where the permits were released. Getting that coordination right taught me that synchronization is not just about locking data, but also about safely waking up waiting threads when work is done.]
 
 ## Question 3: How did you overcome the challenges you faced?
 
@@ -265,7 +266,7 @@
 
 **Your Answer:** *(5-7 sentences)*
 
-[Write your answer here.]
+[. I solved the problems by doing one feature at a time and compiling after each small change. When the compiler showed errors—like unreachable code after return or a missing brace in SharedStats—I checked the error lines and fixed them right away. I also ran the program several times to check the VERIFICATION numbers and make sure everything matched with 0 busy-waiting polls. Even when the terminal displayed ? instead of ✔ due to the console font, I checked the expected and observed numbers carefully to confirm the run succeeded. Testing step by step made it much easier to find mistakes without getting overwhelmed.]
 
 ## Question 4: Where can synchronization concepts be applied in real-world applications?
 
@@ -273,7 +274,7 @@
 
 **Your Answer:** *(5-7 sentences)*
 
-[Write your answer here.]
+[Synchronization concepts are critical in banking systems when two transactions—such as an ATM withdrawal and a mobile transfer—access the same account balance at the same time. Without a lock protecting that read-modify-write critical section, both operations could read the same starting balance and overwrite each other, causing lost updates or an overdraft. Just like SharedStats uses ReentrantLock to guard shared counters, a banking system uses mutual exclusion so only one transaction updates an account balance at a time. In an airline or concert seat booking platform, two users might click "Book" on the last open seat at the exact same moment. Protecting both checking availability and marking the seat as reserved inside a locked critical section prevents double booking, while a counting semaphore like availableProcesses in ReadyQueue can coordinate limited booking slots or waiting requests cleanly.]
 
 ### Optional: What would you like to learn more about?
 
