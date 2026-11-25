@@ -194,16 +194,16 @@
 
 ---
 
-### Entry 5 - [Date and Time]
-**What I did**:
+### Entry 5 - [November 25, 2026, 9:00 Pm]
+**What I did**: complete part C
 
-**Details**:
+**Details**: 
 
-**Challenges**:
+**Challenges**: including specific code and output details in answer.
 
-**Solution**:
+**Solution**: copy from .java file .
 
-**Time spent**:
+**Time spent**: 1 hour.
 
 ---
 
@@ -308,20 +308,37 @@
 
 **Your Answer:** *(3-5 sentences)*
 
-[Write your answer here.]
+[In my original starter run with student ID 446052740, all checks failed: context switches were 23 instead of 27, completed processes were 10 instead of 13, total service time was 37759 ms instead of 41855 ms, and busy-waiting polls jumped to 644 instead of 0. A race condition causes these lost updates on read-modify-write critical sections because reading a variable, updating it, and writing it back are separate steps rather than one atomic operation. Even on a real machine without RaceWindow.pause(), OS thread scheduling and preemption can interleave two CPU threads right after a read and overwrite an increment. Because thread timing varies from run to run, this bug is hard to detect reliably unless triggered repeatedly or tested under contention.]
 
 Verification block of the **original starter**:
 ```
-[Paste the verification block (or the exception/watchdog message) of the starter here]
+[VERIFICATION (expected values are computed from YOUR seed) ═══
+  Context switches (quanta executed)     expected 27       observed 23       ? MISMATCH
+  Completed processes                    expected 13       observed 10       ? MISMATCH
+  Total service time (ms)                expected 41855    observed 37759    ? MISMATCH
+  Busy-waiting polls (must be 0)         expected 0        observed 644      ? MISMATCH
+  ? At least one check failed (see the ? lines above): a race condition or busy waiting is still present.]
 ```
 
 Verification block of **my final version**:
 ```
-[Paste the verification block of your final version here (all lines ✔)]
+[VERIFICATION (expected values are computed from YOUR seed) ═══
+  Context switches (quanta executed)     expected 27       observed 27       ?
+  Completed processes                    expected 13       observed 13       ?
+  Total service time (ms)                expected 41855    observed 41855    ?
+  Busy-waiting polls (must be 0)         expected 0        observed 0        ?
+  ? All shared values are consistent.]
 ```
 
 **Explanation of the timeline:**
-[Explain the lost update step by step.]
+[
+CPU-1 reads contextSwitchCount (for example, 12).
+
+RaceWindow.pause() pauses CPU-1 before it writes, allowing CPU-2 to also read contextSwitchCount (12).
+
+CPU-1 computes 12 + 1 = 13 and writes 13 back to contextSwitchCount.
+
+CPU-2 computes 12 + 1 = 13 and writes 13, overwriting CPU-1's increment so one context switch is lost (13 instead of 14).]
 
 ## Question 2: Critical Sections and Lock Granularity
 
@@ -331,12 +348,21 @@ Verification block of **my final version**:
 
 **Your Answer:** *(3-5 sentences)*
 
-[Write your answer here.]
+[I protected ReadyQueue (add, poll, processOf, and snapshot) with queueLock and used three separate ReentrantLocks in SharedStats (contextSwitchLock, completedProcessLock, and serviceTimeLock) for each counter's update and getter methods. Using one lock per variable in SharedStats lets threads update independent statistics at the same time instead of blocking each other, with the trade-off of managing extra locks carefully. Keeping queueLock separate from the statistics locks prevents queue work and counter updates from holding each other up or causing nested-lock deadlocks. Using lock() with try/finally ensures mutual exclusion and progress, while a default non-fair ReentrantLock means threads do not strictly acquire the lock in arrival order and do not have a strict bound on waiting under heavy contention.]
 
 | Critical section (variable / method) | Lock used | Why it needs protection |
 |---|---|---|
 | [e.g., `ReadyQueue.poll()`] | [lock name] | [reason] |
 | [...] | [...] | [...] |
+
+|ReadyQueue.add(), poll(), processOf(), snapshot() (list and map) | queueLock |Prevents two CPUs from taking or losing the same process and avoids ConcurrentModificationException during iteration|
+
+|SharedStats.incrementContextSwitch() and getContextSwitchCount() (contextSwitchCount)|contextSwitchLock|Prevents lost read-modify-write updates and inconsistent reads on contextSwitchCount|
+
+|SharedStats.incrementCompletedProcess() and getCompletedProcessCount() (completedProcessCount)|completedProcessLock|Prevents lost updates on completedProcessCount so completion detection stays accurate|
+
+|SharedStats.addServiceTime() and getTotalServiceTime() (totalServiceTime)|serviceTimeLock|Prevents concurrent threads from overwriting updates to totalServiceTime|
+
 
 ## Question 3: Busy Waiting vs Semaphore
 
@@ -346,7 +372,7 @@ Verification block of **my final version**:
 
 **Your Answer:** *(3-5 sentences)*
 
-[Write your answer here.]
+[In the starter code, a CPU that found an empty ready queue kept looping and polling ([paste your starter busy-waiting polls count here] busy-waiting polls in my starter run), wasting CPU time while waiting for work instead of blocking. My counting semaphore (availableProcesses) represents how many processes are waiting in ReadyQueue, starting at 0 because the queue begins empty and reaching 13 right after the 13 initial add() calls release permits. In my final version, a CPU calling acquireProcess() when no process is ready stays in a blocked state rather than polling on the CPU. At the end, the CPU that finishes the last process calls releaseForShutdown(SharedStats.totalCPUs) so any blocked CPUs wake up and exit cleanly, whereas skipping it would leave waiting CPUs blocked forever and trigger the watchdog.]
 
 ## Question 4: Classical Problems and Deadlock
 
@@ -357,24 +383,34 @@ Verification block of **my final version**:
 **Your Answer:** *(3-5 sentences)*
 
 **Classical problem and roles**:
-[Name the problem; who is the producer, who is the consumer?]
+[Bounded-Buffer (Producer-Consumer) problem
+
+Producer: main produces the initial processes and adds them to ReadyQueue; CpuWorker threads also act as producers when they re-enqueue processes that still have remaining burst time.
+
+Consumer: CpuWorker threads act as consumers when they take (poll) processes from ReadyQueue to execute a time quantum.
+]
 
 **Semaphores for a bounded queue (name and initial value)**:
-[Name the three semaphores and their initial values.]
+[
+empty: initial value K (free slots in the bounded queue)
+
+full: initial value 0 (items currently waiting in the queue)
+
+mutex: initial value 1 (mutex/lock protecting queue operations)]
 
 **Deadlock scenario and prevention**:
-[Describe the scenario and the necessary condition you would break.]
+[If a thread acquires mutex before calling acquire() on empty or full and blocks, it holds mutex while waiting, preventing any other thread from locking mutex to free a slot or add a process. Breaking the hold-and-wait condition—by acquiring the semaphore permit before locking mutex—prevents this deadlock.]
 
 ## Summary
 
 **Key concepts I understood through these questions:**
-1.
-2.
-3.
+1. race condition.
+2. mutual exclusion.
+3. Counting semaphores.
 
 **Concepts I need to study more:**
-1.
-2.
+1. Lock fairness and bounded waiting.
+2. Deadlock prevention and hold-and-wait.
 
 ---
 
